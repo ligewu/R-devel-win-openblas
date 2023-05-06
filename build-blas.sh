@@ -40,10 +40,10 @@ VERREM=$(svn info https://svn.r-project.org/R/trunk | grep Revision: | awk '{pri
 if [ -d "${srcdir}/trunk" ]; then
     if [ $VERLOC = $VERREM ]; then
         echo "no changed, skip build."
-        exit 0
+        # exit 0
     else
         echo "remote updated, run svn update."
-        svn update ${srcdir}/trunk
+        svn update ${srcdir}/trunk --accept theirs-full
         echo "make clean and rebuild"
         cd "${srcdir}/trunk/src/gnuwin32"
         make clean
@@ -58,6 +58,7 @@ cd "${srcdir}/trunk"
 unzip -o ../$TCLBUNDLE
 
 # Add custom patches here:
+svn revert -R ${srcdir}/trunk
 patch -Np1 -i "${srcdir}/blas.diff"
 
 
@@ -72,7 +73,7 @@ make distribution
 
 # Copy to home dir
 cd ${srcdir}
-cp -v trunk/src/gnuwin32/installer/R-devel-win.exe ./R-devel-win-${VERREM}.exe
+mv -v trunk/src/gnuwin32/installer/R-devel-win.exe ./R-devel-win-${VERREM}.exe
 installer=$(ls *.exe)
 echo "::set-output name=installer::$installer"
 echo "Done: $installer"
